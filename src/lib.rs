@@ -5,7 +5,7 @@
 // In general enthusiastic readers should read https://doc.rust-lang.org/book/title-page.html - it's a 
 // great grounding in the language.
 
-mod vdb {
+pub mod vdb {
     use std::collections::HashMap;
     use indexmap::IndexMap;
     type EngineIndex = usize;
