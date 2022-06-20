@@ -143,7 +143,7 @@ pub mod vdb {
                             }
                         }
                     },
-                    Err(e) => panic!(e),
+                    Err(e) => panic!("{}", e),
                 }
             }
 
