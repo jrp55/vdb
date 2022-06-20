@@ -156,17 +156,26 @@ pub mod vdb {
     #[cfg(test)]
     mod tests {
 
-        fn setup_test_vdb(kind: super::VDBKind) -> super::VDB {
-            let mut mapping = indexmap::IndexMap::new();
-            mapping.insert(0, "foo".to_string());
-            mapping.insert(1, "bar".to_string());
-
-            super::VDB{ name: "testVDB".to_string(), kind: kind, mapping: mapping }
+        macro_rules! count_mapping {
+            ($($dbname:expr),+) => {{
+              let mut mapping = indexmap::IndexMap::new();
+              $(
+                mapping.insert(mapping.len() as EngineIndex, $dbname.to_string());
+              )+
+              mapping
+            }};
         }
+
+        macro_rules! setup_vdb {
+            ($k:expr; $($dbname:expr),+) => {{
+                super::VDB{ name: "testVDB".to_string(), kind: $k, mapping: count_mapping!($($dbname),+) }
+            }}
+        }
+
         use super::*;
         #[test]
         fn basic_combinator() -> Result<(), String> {
-            let vdb = setup_test_vdb(VDBKind::Combinator);
+            let vdb = setup_vdb!(VDBKind::Combinator; "foo", "bar");
             let result = vdb.select_database();
             match result {
                 Ok(result_mapping) => {
@@ -183,7 +192,7 @@ pub mod vdb {
 
         #[test]
         fn basic_distributor_failover() -> Result<(), String> {
-            let vdb = setup_test_vdb(VDBKind::Distributor(DistributionMethod::FailOver(0)));
+            let vdb = setup_vdb!(VDBKind::Distributor(DistributionMethod::FailOver(0)); "foo", "bar");
             let result = vdb.select_database();
             match result {
                 Ok(result_mapping) => {
@@ -198,7 +207,7 @@ pub mod vdb {
 
         #[test]
         fn basic_distributor_failover_set_primary() -> Result<(), String> {
-            let mut vdb = setup_test_vdb(VDBKind::Distributor(DistributionMethod::FailOver(0)));
+            let mut vdb = setup_vdb!(VDBKind::Distributor(DistributionMethod::FailOver(0)); "foo", "bar");
             vdb.set_primary_engine(1)?;
             let result = vdb.select_database();
             match result {
